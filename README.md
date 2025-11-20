@@ -12,8 +12,9 @@ Control and manage `__init__.py` files in your Python projects directly from VS 
 - Node.js for development
 
 ## Extension Settings
+This extension contributes one setting:
 
-This extension will contribute settings in future releases.
+- `p-init.initFileColor`: Hex color (e.g. `#FF4081`) used to color `__init__.py` filenames in the Explorer.
 
 ## Known Issues
 

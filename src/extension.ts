@@ -2,25 +2,52 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const INIT_FILENAME = '__init__.py';
+
+class InitFileDecorationProvider implements vscode.FileDecorationProvider {
+	private _onDidChange = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
+	readonly onDidChangeFileDecorations = this._onDidChange.event;
+
+	provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+		try {
+			if (uri && uri.path) {
+				const name = uri.path.split('/').pop();
+				if (name === INIT_FILENAME) {
+					const config = vscode.workspace.getConfiguration('p-init');
+					const color = config.get<string>('initFileColor') || '#FF4081';
+					return new vscode.FileDecoration(undefined, 'P_Init file', color as unknown as vscode.ThemeColor);
+				}
+			}
+		} catch (e) {
+			// ignore
+		}
+		return undefined;
+	}
+
+	// helper to fire change event for all URIs (undefined signals change for all)
+	refresh() {
+		this._onDidChange.fire(undefined);
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
+	console.log('P_Init: activating extension');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "p-init" is now active!');
+	const provider = new InitFileDecorationProvider();
+	context.subscriptions.push(vscode.window.registerFileDecorationProvider(provider));
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+	// When configuration changes, refresh decorations
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration('p-init.initFileColor')) {
+			provider.refresh();
+		}
+	}));
+
+	// Keep a simple command for debugging
 	const disposable = vscode.commands.registerCommand('p-init.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from P_Init!');
 	});
-
 	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
