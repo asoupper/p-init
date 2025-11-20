@@ -15,6 +15,7 @@ suite('InitFileDecorationProvider Test Suite', () => {
 		assert.ok(initDecoration, 'Expected decoration for __init__.py');
 		if (initDecoration) {
 			assert.strictEqual(initDecoration.tooltip, 'P_Init file');
+			assert.strictEqual(initDecoration.badge, 'init');
 		}
 
 		assert.strictEqual(otherDecoration, undefined, 'Expected no decoration for non-init file');

@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 const INIT_FILENAME = '__init__.py';
 
@@ -11,11 +12,18 @@ export class InitFileDecorationProvider implements vscode.FileDecorationProvider
 	provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
 		try {
 			if (uri && uri.path) {
-				const name = uri.path.split('/').pop();
+					const name = path.basename(uri.fsPath);
 				if (name === INIT_FILENAME) {
 					const config = vscode.workspace.getConfiguration('p-init');
-					const color = config.get<string>('initFileColor') || '#FF4081';
-					return new vscode.FileDecoration(undefined, 'P_Init file', color as unknown as vscode.ThemeColor);
+						const colorSetting = config.get<string>('initFileColor') || '';
+						// Explorer coloring via ThemeColor tokens is supported; if user supplied a theme token, use it.
+						// For now, always show a visible badge so the file is obvious in the Explorer.
+						const badge = 'init';
+						let color: vscode.ThemeColor | undefined;
+						if (colorSetting && !colorSetting.startsWith('#')) {
+							color = new vscode.ThemeColor(colorSetting);
+						}
+						return new vscode.FileDecoration(badge, 'P_Init file', color);
 				}
 			}
 		} catch (e) {
