@@ -15,7 +15,10 @@ suite('InitFileDecorationProvider Test Suite', () => {
 		assert.ok(initDecoration, 'Expected decoration for __init__.py');
 		if (initDecoration) {
 			assert.strictEqual(initDecoration.tooltip, 'P_Init file');
-			assert.strictEqual(initDecoration.badge, 'init');
+			// color is provided as a hex string cast to ThemeColor at runtime; access via any
+			const c = (initDecoration as any).color;
+			assert.ok(c, 'Expected a color value for __init__.py decoration');
+			assert.strictEqual(c, '#FF4081');
 		}
 
 		assert.strictEqual(otherDecoration, undefined, 'Expected no decoration for non-init file');

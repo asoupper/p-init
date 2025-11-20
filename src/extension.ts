@@ -15,19 +15,15 @@ export class InitFileDecorationProvider implements vscode.FileDecorationProvider
 					const name = path.basename(uri.fsPath);
 				if (name === INIT_FILENAME) {
 					const config = vscode.workspace.getConfiguration('p-init');
-						const colorSetting = config.get<string>('initFileColor') || '';
-						// Explorer coloring via ThemeColor tokens is supported; if user supplied a theme token, use it.
-						// For now, always show a visible badge so the file is obvious in the Explorer.
-						const badge = 'init';
-						let color: vscode.ThemeColor | undefined;
-						if (colorSetting && !colorSetting.startsWith('#')) {
-							color = new vscode.ThemeColor(colorSetting);
-						}
-						return new vscode.FileDecoration(badge, 'P_Init file', color);
+					const color = config.get<string>('initFileColor') || '#FF4081';
+					// The FileDecoration API expects a ThemeColor, but consumers have asked
+					// to use hex colors. Cast the hex string to ThemeColor so it is passed
+					// through at runtime. Note: some themes may not honor raw hex strings.
+					return new vscode.FileDecoration(undefined, 'P_Init file', color as unknown as vscode.ThemeColor);
 				}
 			}
 		} catch (e) {
-			// ignore
+			console.error('Error in InitFileDecorationProvider:', e);
 		}
 		return undefined;
 	}
