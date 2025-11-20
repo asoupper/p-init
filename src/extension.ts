@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 const INIT_FILENAME = '__init__.py';
 
-class InitFileDecorationProvider implements vscode.FileDecorationProvider {
+export class InitFileDecorationProvider implements vscode.FileDecorationProvider {
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
 	readonly onDidChangeFileDecorations = this._onDidChange.event;
 
@@ -35,6 +35,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const provider = new InitFileDecorationProvider();
 	context.subscriptions.push(vscode.window.registerFileDecorationProvider(provider));
+
+	// Watch for changes to any __init__.py files in the workspace and refresh decorations
+	try {
+		const watcher = vscode.workspace.createFileSystemWatcher('**/__init__.py');
+		context.subscriptions.push(watcher);
+		watcher.onDidCreate(() => provider.refresh(), null, context.subscriptions);
+		watcher.onDidChange(() => provider.refresh(), null, context.subscriptions);
+		watcher.onDidDelete(() => provider.refresh(), null, context.subscriptions);
+	} catch (e) {
+		// ignore environments that don't support workspace (e.g., tests)
+	}
 
 	// When configuration changes, refresh decorations
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
