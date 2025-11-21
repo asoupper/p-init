@@ -2,7 +2,7 @@
   "name": "p-init",
   "publisher": "asoupper",
   "displayName": "P_Init",
-  "description": "Allows to control the appearance of the __init__.py files",
+  "description": "Colors __init__.py files dark grey in the Explorer",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.106.1"
@@ -11,28 +11,21 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished",
-    "onLanguage:python"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
+    "colors": [
       {
-        "command": "p-init.helloWorld",
-        "title": "Hello World"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "P_Init",
-      "properties": {
-        "p-init.initFileColor": {
-          "type": "string",
-          "default": "#FF4081",
-          "description": "Hex color or theme color to use for __init__.py file names in Explorer"
+        "id": "pinit.decorations.initFile",
+        "description": "Color used to render __init__.py Explorer entries.",
+        "defaults": {
+          "dark": "#70707099",
+          "light": "#70707099",
+          "highContrast": "#70707099"
         }
       }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

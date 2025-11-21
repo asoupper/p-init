@@ -1,6 +1,6 @@
 # P_Init
 
-A Visual Studio Code extension that allows you to control the appearance of `__init__.py` files.
+A Visual Studio Code extension that automatically renders every `__init__.py` file in the Explorer using a dark grey tint (`#70707099`).
 
 ## Features
 
@@ -12,9 +12,9 @@ Control and manage `__init__.py` files in your Python projects directly from VS 
 - Node.js for development
 
 ## Extension Settings
-This extension contributes one setting:
+No user-facing settings are required—the extension contributes a color token named `pinit.decorations.initFile` (default `#70707099`) and uses it for every Explorer decoration.
 
-- `p-init.initFileColor`: Hex color (e.g. `#FF4081`) used to color `__init__.py` filenames in the Explorer.
+You can open the `P_Init` output channel (View → Output → P_Init) to view simple activation logs.
 
 ## Known Issues
 
