@@ -1,5 +1,6 @@
 {
   "name": "p-init",
+  "publisher": "asoupper",
   "displayName": "P_Init",
   "description": "Allows to control the appearance of the __init__.py files",
   "version": "0.0.1",
