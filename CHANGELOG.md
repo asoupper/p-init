@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.4] - 2025-11-24
+
+- Adjust the default non-empty `__init__.py` decoration color to a translucent white overlay for better Explorer contrast.
+
 ## [0.0.3] - 2025-11-24
 
 - Introduce separate decorations for empty vs. non-empty `__init__.py` files with dedicated settings.
