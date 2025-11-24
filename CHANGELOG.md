@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.5] - 2025-11-24
+
+- Lower the extension engine requirement to VS Code 1.105.1 to match the current Pylance baseline.
+
 ## [0.0.4] - 2025-11-24
 
 - Adjust the default non-empty `__init__.py` decoration color to a translucent white overlay for better Explorer contrast.

@@ -3,9 +3,9 @@
   "publisher": "asoupper",
   "displayName": "P_Init",
   "description": "Colors __init__.py files dark grey in the Explorer",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.105.1"
   },
   "categories": [
     "Other"
@@ -59,10 +59,10 @@
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test --code-version 1.105.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.106.1",
+    "@types/vscode": "^1.105.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "typescript-eslint": "^8.46.3",

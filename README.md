@@ -8,7 +8,7 @@ Control and manage `__init__.py` files in your Python projects directly from VS 
 
 ## Requirements
 
-- Visual Studio Code v1.106.1 or higher
+- Visual Studio Code v1.105.1 or higher
 - Node.js for development
 
 ## Extension Settings
@@ -24,6 +24,10 @@ You can open the `P_Init` output channel (View → Output → P_Init) to view si
 None at this time.
 
 ## Release Notes
+
+### 0.0.5
+
+- Raise the minimum VS Code requirement to 1.105.1 so we stay aligned with the current Pylance baseline.
 
 ### 0.0.4
 
