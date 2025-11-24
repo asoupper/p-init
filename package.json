@@ -5,7 +5,7 @@
   "description": "Colors __init__.py files dark grey in the Explorer",
   "version": "0.0.3",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.93.0"
   },
   "categories": [
     "Other"
@@ -29,9 +29,9 @@
         "id": "pinit.decorations.initFile",
         "description": "Color used to render non-empty __init__.py Explorer entries.",
         "defaults": {
-          "dark": "#505050cc",
-          "light": "#505050cc",
-          "highContrast": "#505050cc"
+          "dark": "#FFFFFF99",
+          "light": "#FFFFFF99",
+          "highContrast": "#FFFFFF99"
         }
       }
     ],
@@ -46,7 +46,7 @@
         },
         "p-init.nonEmptyInitFileColor": {
           "type": "string",
-          "default": "#505050cc",
+          "default": "#FFFFFF99",
           "description": "Color used for non-empty __init__.py decorations. Accepts a theme token or a hex value."
         }
       }
