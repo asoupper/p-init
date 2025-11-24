@@ -1,6 +1,6 @@
 # P_Init
 
-A Visual Studio Code extension that automatically renders every `__init__.py` file in the Explorer using a configurable tint (dark grey `#70707099` by default).
+A Visual Studio Code extension that automatically renders every `__init__.py` file in the Explorer using contextual colors (empty files stay mid-grey, non-empty entries use a slightly darker shade).
 
 ## Features
 
@@ -12,9 +12,10 @@ Control and manage `__init__.py` files in your Python projects directly from VS 
 - Node.js for development
 
 ## Extension Settings
-This extension contributes one setting:
+This extension contributes two settings:
 
-- `p-init.initFileColor`: Accepts a VS Code theme token (e.g. `list.highlightForeground`) or a hex value such as `#FF4081`. Hex values are stored in `workbench.colorCustomizations` under `pinit.decorations.initFile`, while theme tokens are referenced directly.
+- `p-init.emptyInitFileColor`: Accepts a VS Code theme token (e.g. `list.highlightForeground`) or a hex value such as `#FF4081`. Hex values are stored under the `pinit.decorations.initFileEmpty` color token.
+- `p-init.nonEmptyInitFileColor`: Applies to non-empty `__init__.py` files (defaults to a darker #505050cc). Hex values are stored under `pinit.decorations.initFile`.
 
 You can open the `P_Init` output channel (View → Output → P_Init) to view simple activation logs, including when color changes are applied.
 
@@ -24,9 +25,17 @@ None at this time.
 
 ## Release Notes
 
+### 0.0.3
+
+- Differentiate decorations for empty vs. non-empty `__init__.py` files with independent settings.
+
+### 0.0.2
+
+- Allow configuring the decoration color through `p-init.initFileColor`, supporting both theme tokens and hex values.
+
 ### 0.0.1
 
-Initial release of P_Init extension.
+- Initial release of P_Init extension.
 
 ---
 

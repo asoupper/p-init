@@ -4,9 +4,33 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 const INIT_FILENAME = '__init__.py';
-const DEFAULT_COLOR = '#70707099';
-const COLOR_SETTING_KEY = 'p-init.initFileColor';
-export const DECORATION_THEME_ID = 'pinit.decorations.initFile';
+const CONFIG_SECTION = 'p-init';
+const EMPTY_COLOR_SETTING_NAME = 'emptyInitFileColor';
+const NON_EMPTY_COLOR_SETTING_NAME = 'nonEmptyInitFileColor';
+const EMPTY_COLOR_SETTING_KEY = `${CONFIG_SECTION}.${EMPTY_COLOR_SETTING_NAME}`;
+const NON_EMPTY_COLOR_SETTING_KEY = `${CONFIG_SECTION}.${NON_EMPTY_COLOR_SETTING_NAME}`;
+const DEFAULT_EMPTY_COLOR = '#70707099';
+const DEFAULT_NON_EMPTY_COLOR = '#505050cc';
+export const EMPTY_DECORATION_THEME_ID = 'pinit.decorations.initFileEmpty';
+export const NON_EMPTY_DECORATION_THEME_ID = 'pinit.decorations.initFile';
+// Export legacy identifier for downstream tests that still import the single-color constant.
+export const DECORATION_THEME_ID = NON_EMPTY_DECORATION_THEME_ID;
+
+type InitFileColors = {
+	empty: vscode.ThemeColor;
+	nonEmpty: vscode.ThemeColor;
+};
+
+interface FileStateInspector {
+	isEmpty(uri: vscode.Uri): Promise<boolean>;
+}
+
+class WorkspaceFileStateInspector implements FileStateInspector {
+	async isEmpty(uri: vscode.Uri): Promise<boolean> {
+		const stat = await vscode.workspace.fs.stat(uri);
+		return stat.size === 0;
+	}
+}
 
 /**
  * Provides file decorations for Python `__init__.py` files in the VS Code explorer.
@@ -25,27 +49,58 @@ export const DECORATION_THEME_ID = 'pinit.decorations.initFile';
 export class InitFileDecorationProvider implements vscode.FileDecorationProvider {
 	private readonly emitter = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
 	readonly onDidChangeFileDecorations = this.emitter.event;
-	private color: vscode.ThemeColor;
+	private colors: InitFileColors;
+	private readonly inspector: FileStateInspector;
+	private readonly emptinessCache = new Map<string, boolean>();
 
-	constructor(initialColor: vscode.ThemeColor) {
-		this.color = initialColor;
+	constructor(initialColors: InitFileColors, inspector: FileStateInspector = new WorkspaceFileStateInspector()) {
+		this.colors = initialColors;
+		this.inspector = inspector;
 	}
 
-	provideFileDecoration(uri: vscode.Uri): vscode.ProviderResult<vscode.FileDecoration> {
+	async provideFileDecoration(uri: vscode.Uri): Promise<vscode.FileDecoration | undefined> {
 		const name = path.basename(uri.fsPath);
-		if (name === INIT_FILENAME) {
-			return new vscode.FileDecoration(undefined, '__init__.py file', this.color);
+		if (name !== INIT_FILENAME) {
+			return undefined;
 		}
-		return undefined;
+		const isEmpty = await this.isFileEmpty(uri);
+		const color = isEmpty ? this.colors.empty : this.colors.nonEmpty;
+		const tooltip = isEmpty ? 'Empty __init__.py file' : 'Non-empty __init__.py file';
+		return new vscode.FileDecoration(undefined, tooltip, color);
 	}
 
 	refresh(): void {
 		this.emitter.fire(undefined);
 	}
 
-	setColor(color: vscode.ThemeColor): void {
-		this.color = color;
+	setColors(colors: InitFileColors): void {
+		this.colors = colors;
+		this.invalidateCache();
 		this.refresh();
+	}
+
+	invalidateCache(uri?: vscode.Uri): void {
+		if (uri) {
+			this.emptinessCache.delete(uri.fsPath);
+			return;
+		}
+		this.emptinessCache.clear();
+	}
+
+	private async isFileEmpty(uri: vscode.Uri): Promise<boolean> {
+		const cacheKey = uri.fsPath;
+		if (this.emptinessCache.has(cacheKey)) {
+			return this.emptinessCache.get(cacheKey)!;
+		}
+		try {
+			const empty = await this.inspector.isEmpty(uri);
+			this.emptinessCache.set(cacheKey, empty);
+			return empty;
+		} catch (error) {
+			console.warn(`P_Init: failed to inspect ${uri.fsPath}`, error);
+			this.emptinessCache.delete(cacheKey);
+			return false;
+		}
 	}
 }
 
@@ -67,30 +122,39 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(output);
 	output.appendLine('P_Init: activating extension');
 
-	const initialColor = await resolveDecorationThemeColor(output);
-	const provider = new InitFileDecorationProvider(initialColor);
+	const colors = await resolveDecorationThemeColors(output);
+	const provider = new InitFileDecorationProvider(colors);
 	context.subscriptions.push(vscode.window.registerFileDecorationProvider(provider));
 
 	try {
 		const watcher = vscode.workspace.createFileSystemWatcher('**/__init__.py');
 		context.subscriptions.push(watcher);
-		watcher.onDidCreate(() => provider.refresh(), null, context.subscriptions);
-		watcher.onDidChange(() => provider.refresh(), null, context.subscriptions);
-		watcher.onDidDelete(() => provider.refresh(), null, context.subscriptions);
+		watcher.onDidCreate(uri => {
+			provider.invalidateCache(uri);
+			provider.refresh();
+		}, null, context.subscriptions);
+		watcher.onDidChange(uri => {
+			provider.invalidateCache(uri);
+			provider.refresh();
+		}, null, context.subscriptions);
+		watcher.onDidDelete(uri => {
+			provider.invalidateCache(uri);
+			provider.refresh();
+		}, null, context.subscriptions);
 	} catch (error) {
 		output.appendLine(`Watcher setup failed: ${String(error)}`);
 		console.error('P_Init: watcher setup failed', error);
 	}
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(async event => {
-		if (event.affectsConfiguration(COLOR_SETTING_KEY)) {
-			output.appendLine('Detected init file color change. Applying new value...');
-			const updatedColor = await resolveDecorationThemeColor(output);
-			provider.setColor(updatedColor);
+		if (event.affectsConfiguration(EMPTY_COLOR_SETTING_KEY) || event.affectsConfiguration(NON_EMPTY_COLOR_SETTING_KEY)) {
+			output.appendLine('Detected init file color change. Applying new values...');
+			const updatedColors = await resolveDecorationThemeColors(output);
+			provider.setColors(updatedColors);
 		}
 	}));
 
-	output.appendLine('All __init__.py files now use the color defined by p-init.initFileColor.');
+	output.appendLine('Empty and non-empty __init__.py files now use their respective colors from the P_Init settings.');
 }
 
 /**
@@ -111,28 +175,26 @@ export function deactivate() {}
  * @param output - The output channel for logging color customization operations
  * @returns A promise that resolves to a ThemeColor instance
  */
-async function resolveDecorationThemeColor(output: vscode.OutputChannel): Promise<vscode.ThemeColor> {
-	// Respect user preference: hex values get mapped via color customizations, token strings are used directly.
-	const colorSetting = getConfiguredColor();
+async function resolveDecorationThemeColors(output: vscode.OutputChannel): Promise<InitFileColors> {
+	const emptyColor = await resolveColorFromSetting(EMPTY_COLOR_SETTING_NAME, EMPTY_DECORATION_THEME_ID, DEFAULT_EMPTY_COLOR, output);
+	const nonEmptyColor = await resolveColorFromSetting(NON_EMPTY_COLOR_SETTING_NAME, NON_EMPTY_DECORATION_THEME_ID, DEFAULT_NON_EMPTY_COLOR, output);
+	return { empty: emptyColor, nonEmpty: nonEmptyColor };
+}
+
+async function resolveColorFromSetting(settingName: string, themeId: string, fallback: string, output: vscode.OutputChannel): Promise<vscode.ThemeColor> {
+	const colorSetting = getConfiguredColor(settingName, fallback);
 	if (isHexColor(colorSetting)) {
-		await applyColorCustomization(colorSetting, output);
-		return new vscode.ThemeColor(DECORATION_THEME_ID);
+		await applyColorCustomization(themeId, colorSetting, output);
+		return new vscode.ThemeColor(themeId);
 	}
-	await removeColorCustomizationIfPresent(output);
+	await removeColorCustomizationIfPresent(themeId, output);
 	return new vscode.ThemeColor(colorSetting);
 }
 
-/**
- * Retrieves the configured color for the init file from the workspace settings.
- * 
- * @returns The configured color value from the 'p-init.initFileColor' setting,
- * or the DEFAULT_COLOR if the setting is not defined or contains only whitespace.
- */
-function getConfiguredColor(): string {
-	// Read the extension setting while falling back to a sensible default.
-	const config = vscode.workspace.getConfiguration('p-init');
-	const value = config.get<string>('initFileColor');
-	return (value && value.trim()) || DEFAULT_COLOR;
+function getConfiguredColor(settingName: string, fallback: string): string {
+	const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+	const value = config.get<string>(settingName);
+	return (value && value.trim()) || fallback;
 }
 
 function isHexColor(value: string): boolean {
@@ -156,17 +218,17 @@ function isHexColor(value: string): boolean {
  * which allows FileDecoration to reference it. The configuration target is determined
  * by the `getColorCustomizationTarget()` function.
  */
-async function applyColorCustomization(hexColor: string, output: vscode.OutputChannel): Promise<void> {
+async function applyColorCustomization(themeId: string, hexColor: string, output: vscode.OutputChannel): Promise<void> {
 	// Store the requested hex color under a dedicated token so FileDecoration can reference it.
 	const config = vscode.workspace.getConfiguration();
 	const target = getColorCustomizationTarget();
 	const customizations = { ...(config.get<Record<string, unknown>>('workbench.colorCustomizations') || {}) };
-	if (customizations[DECORATION_THEME_ID] === hexColor) {
+	if (customizations[themeId] === hexColor) {
 		return;
 	}
-	customizations[DECORATION_THEME_ID] = hexColor;
+	customizations[themeId] = hexColor;
 	await config.update('workbench.colorCustomizations', customizations, target);
-	output.appendLine(`Applied hex color ${hexColor} to ${DECORATION_THEME_ID}.`);
+	output.appendLine(`Applied hex color ${hexColor} to ${themeId}.`);
 }
 
 /**
@@ -180,17 +242,17 @@ async function applyColorCustomization(hexColor: string, output: vscode.OutputCh
  * @param output - The output channel where log messages will be written
  * @returns A promise that resolves when the color customization has been removed and the configuration updated
  */
-async function removeColorCustomizationIfPresent(output: vscode.OutputChannel): Promise<void> {
+async function removeColorCustomizationIfPresent(themeId: string, output: vscode.OutputChannel): Promise<void> {
 	// Clean up previously set custom colors when the user switches back to a theme token.
 	const config = vscode.workspace.getConfiguration();
 	const customizations = { ...(config.get<Record<string, unknown>>('workbench.colorCustomizations') || {}) };
-	if (!(DECORATION_THEME_ID in customizations)) {
+	if (!(themeId in customizations)) {
 		return;
 	}
-	delete customizations[DECORATION_THEME_ID];
+	delete customizations[themeId];
 	const target = getColorCustomizationTarget();
 	await config.update('workbench.colorCustomizations', Object.keys(customizations).length ? customizations : undefined, target);
-	output.appendLine(`Removed custom hex color for ${DECORATION_THEME_ID}.`);
+	output.appendLine(`Removed custom hex color for ${themeId}.`);
 }
 
 /**

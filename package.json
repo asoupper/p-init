@@ -3,7 +3,7 @@
   "publisher": "asoupper",
   "displayName": "P_Init",
   "description": "Colors __init__.py files dark grey in the Explorer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -17,12 +17,21 @@
   "contributes": {
     "colors": [
       {
-        "id": "pinit.decorations.initFile",
-        "description": "Color used to render __init__.py Explorer entries.",
+        "id": "pinit.decorations.initFileEmpty",
+        "description": "Color used to render empty __init__.py Explorer entries.",
         "defaults": {
           "dark": "#70707099",
           "light": "#70707099",
           "highContrast": "#70707099"
+        }
+      },
+      {
+        "id": "pinit.decorations.initFile",
+        "description": "Color used to render non-empty __init__.py Explorer entries.",
+        "defaults": {
+          "dark": "#505050cc",
+          "light": "#505050cc",
+          "highContrast": "#505050cc"
         }
       }
     ],
@@ -30,10 +39,15 @@
       "type": "object",
       "title": "P_Init",
       "properties": {
-        "p-init.initFileColor": {
+        "p-init.emptyInitFileColor": {
           "type": "string",
           "default": "#70707099",
-          "description": "Color used for __init__.py decorations. Accepts a theme token (e.g. list.highlightForeground) or a hex value (e.g. #FF4081)."
+          "description": "Color used for empty __init__.py decorations. Accepts a theme token (e.g. list.highlightForeground) or a hex value (e.g. #FF4081)."
+        },
+        "p-init.nonEmptyInitFileColor": {
+          "type": "string",
+          "default": "#505050cc",
+          "description": "Color used for non-empty __init__.py decorations. Accepts a theme token or a hex value."
         }
       }
     }

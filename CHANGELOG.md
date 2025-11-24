@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.3] - 2025-11-24
+
+- Introduce separate decorations for empty vs. non-empty `__init__.py` files with dedicated settings.
+- Add `pinit.decorations.initFileEmpty` color token plus `p-init.emptyInitFileColor` and `p-init.nonEmptyInitFileColor` configuration entries.
+- Cache and refresh file state to avoid repeated disk reads while keeping decorations up to date.
+
 ## [0.0.2] - 2025-11-24
 
 - Add `p-init.initFileColor` setting to let users choose hex colors or theme tokens.
