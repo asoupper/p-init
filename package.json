@@ -14,6 +14,15 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asoupper/p-init.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asoupper/p-init/issues"
+  },
+  "homepage": "https://github.com/asoupper/p-init#readme",
+  "license": "MIT",
   "contributes": {
     "colors": [
       {
