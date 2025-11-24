@@ -10,7 +10,7 @@ const NON_EMPTY_COLOR_SETTING_NAME = 'nonEmptyInitFileColor';
 const EMPTY_COLOR_SETTING_KEY = `${CONFIG_SECTION}.${EMPTY_COLOR_SETTING_NAME}`;
 const NON_EMPTY_COLOR_SETTING_KEY = `${CONFIG_SECTION}.${NON_EMPTY_COLOR_SETTING_NAME}`;
 const DEFAULT_EMPTY_COLOR = '#70707099';
-const DEFAULT_NON_EMPTY_COLOR = '#505050cc';
+const DEFAULT_NON_EMPTY_COLOR = '#FFFFFF99';
 export const EMPTY_DECORATION_THEME_ID = 'pinit.decorations.initFileEmpty';
 export const NON_EMPTY_DECORATION_THEME_ID = 'pinit.decorations.initFile';
 // Export legacy identifier for downstream tests that still import the single-color constant.
