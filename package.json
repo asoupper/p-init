@@ -3,7 +3,7 @@
   "publisher": "asoupper",
   "displayName": "P_Init",
   "description": "Colors __init__.py files dark grey in the Explorer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -25,7 +25,18 @@
           "highContrast": "#70707099"
         }
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "P_Init",
+      "properties": {
+        "p-init.initFileColor": {
+          "type": "string",
+          "default": "#70707099",
+          "description": "Color used for __init__.py decorations. Accepts a theme token (e.g. list.highlightForeground) or a hex value (e.g. #FF4081)."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
