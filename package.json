@@ -5,7 +5,7 @@
   "description": "Colors __init__.py files dark grey in the Explorer",
   "version": "0.0.4",
   "engines": {
-    "vscode": "^1.93.0"
+    "vscode": "^1.106.1"
   },
   "categories": [
     "Other"

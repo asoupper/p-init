@@ -8,7 +8,7 @@ Control and manage `__init__.py` files in your Python projects directly from VS 
 
 ## Requirements
 
-- Visual Studio Code v1.93.0 or higher
+- Visual Studio Code v1.106.1 or higher
 - Node.js for development
 
 ## Extension Settings

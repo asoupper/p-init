@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.0.4] - 2025-11-24
 
 - Adjust the default non-empty `__init__.py` decoration color to a translucent white overlay for better Explorer contrast.
+- Raise the minimum VS Code engine requirement to 1.106.1 to align with the tested runtime.
 
 ## [0.0.3] - 2025-11-24
 
